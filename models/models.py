@@ -6,6 +6,7 @@ from odoo import models, fields, api, exceptions
 class movie(models.Model):
     _name = "movie"
     _description = "Cinema Management"
+    _order = "id desc"
 
     name = fields.Char("Movie Name", require=True)
     genre = fields.Selection([('comedy', 'Comedy'),('action','Action'),('animated','Animated'),('horor','Horor')], string="Genre")
@@ -18,6 +19,7 @@ class movie_timetable(models.Model):
     _name = "movie.timetable"
     _description = "Cinema Timetable"
     _rec_name = 'date'
+    _order = "date desc"
 
     date = fields.Datetime("Start Date", require=True)
     date_end = fields.Datetime("End Date", require=True)
@@ -110,7 +112,6 @@ class sell_cinema_tickets_wizard(models.TransientModel):
                         'res_model': 'account.invoice',
                         'res_id': invoice.id,
                         'target': 'current',
-
                     }
 
 class cinema_room(models.Model):
