@@ -41,8 +41,8 @@
               <page string="Timetable">
                 <field name="timetable" >
                   <tree editable="bottom">
-                    <field name="movie"/>
-                    <field name="date"/>
+                    <field name="date" required="1"/>
+                    <field name="room" required="1"/>
                     <field name="premiere"/>
                   </tree>
                 </field>
@@ -60,7 +60,7 @@
       <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem name="Ciname Management" id="cinema_management.menu_root" groups=""/>
+    <menuitem name="Ciname Management" id="cinema_management.menu_root" />
     <menuitem name="Movies Mangement" id="cinema_management.movies_management" parent="cinema_management.menu_root"
               action="cinema_management.movies_action_window" />
 
@@ -84,6 +84,10 @@
       <field name="name">movie.timetable.form</field>
       <field name="model">movie.timetable</field>
       <field name="arch" type="xml">
+        <header>
+          <button name="sell_tickets_wizard" groups='cinema_management.group_cinema_manager' string="Sell Tickets" type="object"
+                    class="oe_highlight"/>
+        </header>
         <form string="Timetable">
           <sheet>
             <group>
@@ -95,7 +99,7 @@
               <group>
                 <field name="premiere" />
                 <field name="total_seats" />
-                <field name="sold_seats"/>
+                <field name="sold_seats" readonly="1" />
                 <field name="remaining_seats"></field>
               </group>
             </group>
@@ -155,6 +159,7 @@
     </record>
 
 
+
     <record model="ir.actions.act_window" id="cinema_room_action_window">
       <field name="name">Rooms</field>
       <field name="res_model">cinema.room</field>
@@ -191,7 +196,36 @@
 
 
     <menuitem name="eTicket" id="cinema_management.eticket_menu" parent="cinema_management.menu_root"
-              action="cinema_management.product_eticket_action_window"/>
+              action="cinema_management.product_eticket_action_window" groups='cinema_management.group_cinema_manager'/>
+
+
+  <!-- Sold Seats Wizard-->
+    <record model="ir.ui.view" id="sell_cinema_tickets_wizard_form">
+      <field name="name">sell.cinema.tickets.wizard.form</field>
+      <field name="model">sell.cinema.tickets.wizard</field>
+      <field name="arch" type="xml">
+        <form string="Room">
+          <sheet>
+            <group>
+              <group>
+                <field name="tickets"/>
+                <field name="partner_id" required="1"/>
+                <field name="product_id" required="1  "/>
+                <field name="movies_timetable" required="True" invisible="1"/>
+              </group>
+              <group>
+              </group>
+            </group>
+          </sheet>
+          <footer>
+                <button name="sell_tickets" string="Sell Tickets" type="object"
+                    class="oe_highlight"/>
+                or
+                <button string="Cancel" class="oe_link" special="cancel" />
+          </footer>
+        </form>
+      </field>
+    </record>
     <!-- explicit list view definition -->
     <!--
     <record model="ir.ui.view" id="cinema_management.list">
