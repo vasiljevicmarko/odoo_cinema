@@ -1,18 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-
-# class cinema_management(models.Model):
-#     _name = 'cinema_management.cinema_management'
-
-#     name = fields.Char()
-#     value = fields.Integer()
-#     value2 = fields.Float(compute="_value_pc", store=True)
-#     description = fields.Text()
-#
-#     @api.depends('value')
-#     def _value_pc(self):
-#         self.value2 = float(self.value) / 100
 from odoo import models, fields, api, exceptions
 
 class movie(models.Model):
@@ -21,7 +9,7 @@ class movie(models.Model):
 
     name = fields.Char("Movie Name", require=True)
     genre = fields.Selection([('comedy', 'Comedy'),('action','Action'),('animated','Animated'),('horor','Horor')], string="Genre")
-    release_year = fields.Integer("Release Year")
+    release_year = fields.Integer("Release Year", format=None)
     description = fields.Text("Description")
     image = fields.Binary("Image")
     timetable = fields.One2many('movie.timetable', 'movie', 'Timetable')
@@ -31,7 +19,8 @@ class movie_timetable(models.Model):
     _description = "Cinema Timetable"
     _rec_name = 'date'
 
-    date = fields.Datetime("Date", require=True)
+    date = fields.Datetime("Start Date", require=True)
+    date_end = fields.Datetime("End Date", require=True)
     movie = fields.Many2one('movie', string="Movie", require=True)
     room = fields.Many2one('cinema.room', string="Room")
     premiere = fields.Boolean("Premiere")

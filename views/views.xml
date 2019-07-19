@@ -12,6 +12,37 @@
         </tree>
       </field>
     </record>
+
+    <record model="ir.ui.view" id="movie_kanban">
+      <field name="name">movie.kanban</field>
+      <field name="model">movie</field>
+      <field name="arch" type="xml">
+            <kanban>
+                <field name="id"/>
+                <field name="name"/>
+                <field name="image"/>
+                <field name="genre"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_image">
+                                <img t-att-src="kanban_image('movie.kanban', 'image', record.id.raw_value)" alt="Movie"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title"><field name="name"/></strong>
+
+                                <ul>
+                                    <li><strong>Genre: <field name="genre"/></strong></li>
+                                </ul>
+
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+      </field>
+    </record>
+
     <record model="ir.ui.view" id="movie_form">
       <field name="name">movie.form</field>
       <field name="model">movie</field>
@@ -30,20 +61,25 @@
                 <field name="release_year"/>
               </group>
               <group>
-                <field name="image" widget='image' nolabel="1" class="oe_avatar" options='{"preview_image":"image_medium"}'/>
-
+                <field name="image" widget='image' nolabel="1"  class="oe_right oe_image_custom" height="300" width="300" />
               </group>
             </group>
             <notebook>
               <page string="Description">
-                <field name="description"></field>
+                <field name="description" placeholder="Write movie description here..."></field>
               </page>
               <page string="Timetable">
                 <field name="timetable" >
                   <tree editable="bottom">
                     <field name="date" required="1"/>
+                    <field name="date_end" required="True"/>
                     <field name="room" required="1"/>
                     <field name="premiere"/>
+                    <field name="total_seats" />
+                    <field name="sold_seats" readonly="1" />
+                    <field name="remaining_seats"></field>
+                    <button name="sell_tickets_wizard" icon="fa-credit-card" groups='cinema_management.group_cinema_manager' string="Sell Tickets" type="object"
+                    class="oe_highlight"/>
                   </tree>
                 </field>
               </page>
@@ -57,8 +93,30 @@
     <record model="ir.actions.act_window" id="movies_action_window">
       <field name="name">Movies</field>
       <field name="res_model">movie</field>
-      <field name="view_mode">tree,form</field>
+      <field name="view_mode">tree,kanban,form</field>
     </record>
+
+    <record model="ir.actions.act_window.view" id="movies_action_tree_view">
+      <field name="sequence">1</field>
+      <field name="view_mode">tree</field>
+      <field name="view_id" ref="movie_list"></field>
+      <field name="act_window_id" ref="movies_action_window"/>
+    </record>
+
+    <record model="ir.actions.act_window.view" id="movies_action_kanban_view">
+      <field name="sequence">2</field>
+      <field name="view_mode">kanban</field>
+      <field name="view_id" ref="movie_kanban"></field>
+      <field name="act_window_id" ref="movies_action_window"/>
+    </record>
+
+    <record model="ir.actions.act_window.view" id="movies_action_form_view">
+      <field name="sequence">3</field>
+      <field name="view_mode">form</field>
+      <field name="view_id" ref="movie_form"></field>
+      <field name="act_window_id" ref="movies_action_window"/>
+    </record>
+
 
     <menuitem name="Ciname Management" id="cinema_management.menu_root" />
     <menuitem name="Movies Mangement" id="cinema_management.movies_management" parent="cinema_management.menu_root"
@@ -68,15 +126,32 @@
 
 
     <!-- Movies Timetable-->
-    <record model="ir.ui.view" id="movie_timetable_list">
+    <record model="ir.ui.view" id="movie_timetable_list_view">
       <field name="name">movie_timetable.list</field>
       <field name="model">movie.timetable</field>
       <field name="arch" type="xml">
         <tree>
+          <field name="room"/>
           <field name="movie"/>
           <field name="date"/>
+          <field name="date_end" required="True"/>
           <field name="premiere"/>
+          <field name="total_seats" />
+          <field name="sold_seats" readonly="1" />
+          <field name="remaining_seats"></field>
         </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="movie_timetable_calendar_view">
+      <field name="name">movie_timetable.calendar</field>
+      <field name="model">movie.timetable</field>
+      <field name="arch" type="xml">
+      <calendar string="Timetables" date_start="date" color="room">
+          <field name="movie"/>
+          <field name="premiere"/>
+          <field name="remaining_seats"></field>
+      </calendar>
       </field>
     </record>
 
@@ -92,9 +167,10 @@
           <sheet>
             <group>
               <group>
-
+                <field name="room" required="True"/>
                 <field name="date" required="True"/>
-                <field name="movie"/>
+                <field name="date_end" required="True"/>
+                <field name="movie" required="True"/>
               </group>
               <group>
                 <field name="premiere" />
@@ -112,9 +188,29 @@
     <record model="ir.actions.act_window" id="movies_timetable_action_window">
       <field name="name">Timetable</field>
       <field name="res_model">movie.timetable</field>
-      <field name="view_mode">tree,form</field>
+      <field name="view_mode">tree,calendar,form</field>
     </record>
 
+    <record model="ir.actions.act_window.view" id="movie_timetable_tree_act_view">
+      <field name="sequence">1</field>
+      <field name="view_mode">tree</field>
+      <field name="view_id" ref="movie_timetable_list_view"></field>
+      <field name="act_window_id" ref="movies_timetable_action_window"/>
+    </record>
+
+    <record model="ir.actions.act_window.view" id="movie_timetable_calendar_act_view">
+      <field name="sequence">2</field>
+      <field name="view_mode">calendar</field>
+      <field name="view_id" ref="movie_timetable_calendar_view"></field>
+      <field name="act_window_id" ref="movies_timetable_action_window"/>
+    </record>
+
+    <record model="ir.actions.act_window.view" id="movie_timetable_act_form">
+      <field name="sequence">3</field>
+      <field name="view_mode">form</field>
+      <field name="view_id" ref="movie_timetable_form"></field>
+      <field name="act_window_id" ref="movies_timetable_action_window"/>
+    </record>
 
     <menuitem name="Timetable" id="cinema_management.movie_timetable_menu" parent="cinema_management.menu_root"
               action="cinema_management.movies_timetable_action_window"/>
@@ -139,13 +235,10 @@
           <sheet>
             <group>
               <group>
-
                 <field name="name" required="True"/>
                 <field name="capacity" required="True"/>
               </group>
               <group>
-
-
               </group>
             </group>
             <notebook>
