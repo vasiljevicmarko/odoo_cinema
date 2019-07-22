@@ -48,11 +48,13 @@ class movie_timetable(models.Model):
 
     @api.multi
     def sell_tickets_wizard(self):
-
+        for record in self:
+            if record.remaining_seats <= 0:
+                raise exceptions.Warning('Room '+ str(record.room.name)+' is full' )
         return {
 
             'type': 'ir.actions.act_window',
-            'name': 'sell_cinema_tickets_wizard_form',
+            'name': 'Sell Tickets',
             'view_type': 'form',
             'view_mode': 'form',
             'context': {},
@@ -78,11 +80,11 @@ class sell_cinema_tickets_wizard(models.TransientModel):
         for record in self:
             if record.movies_timetable:
                 if not record.product_id.e_ticket:
-                    raise exceptions.Warning('Warning!!! Only eTicket product can be used in this transaction!')
+                    raise exceptions.Warning('eTicket product can only be used in this transaction!')
                 if record.tickets < 1:
-                    raise exceptions.Warning('Warning!!! Number of tickets to sold must be grater than 1!')
+                    raise exceptions.Warning('The Number of tickets to sold must be graeter than 1!')
                 elif record.movies_timetable.remaining_seats < record.tickets:
-                    raise exceptions.Warning('Warning!!! Number of remain seats is less than the number of tickets to sell!')
+                    raise exceptions.Warning('The Number of remain seats is less than the number of tickets to sell!')
                 else:
                     record.movies_timetable.sold_seats += record.tickets
                     invoice = self.env['account.invoice'].create(
